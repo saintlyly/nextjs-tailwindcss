@@ -1,10 +1,10 @@
-import Image from 'next/image';
-import Link from 'next/link';
-import React, { useContext } from 'react';
-import { XCircleIcon } from '@heroicons/react/outline';
-import Layout from '../components/Layout';
-import { Store } from '../utils/Store';
-import { useRouter } from 'next/router';
+import Image from "next/image";
+import Link from "next/link";
+import React, { useContext } from "react";
+import { XCircleIcon } from "@heroicons/react/outline";
+import Layout from "../components/Layout";
+import { Store } from "../utils/Store";
+import { useRouter } from "next/router";
 
 export default function CartScreen() {
   const router = useRouter();
@@ -13,8 +13,12 @@ export default function CartScreen() {
     cart: { cartItems },
   } = state;
   const removeItemHandler = (item) => {
-    dispatch({ type: 'CART_REMOVE_ITEM', payload: item });
+    dispatch({ type: "CART_REMOVE_ITEM", payload: item });
   };
+  const updateCartHandler=(item,qty)=>{
+    const quantity=Number(qty);
+    dispatch({type:'CART_ADD_ITEM',payload:{...item,quantity}})
+  }
   return (
     <Layout title="Shopping Cart">
       <h1 className="mb-4 text-xl">Shopping Cart</h1>
@@ -38,20 +42,34 @@ export default function CartScreen() {
                 {cartItems.map((item) => (
                   <tr key={item.slug} className="border-b">
                     <td>
-                      <Link href={`/product/${item.slug}`} className="flex items-center">
-                       
-                          <Image
-                            src={item.image}
-                            alt={item.name}
-                            width={50}
-                            height={50}
-                          ></Image>
-                          &nbsp;
-                          {item.name}
-                       
+                      <Link
+                        href={`/product/${item.slug}`}
+                        className="flex items-center"
+                      >
+                        <Image
+                          src={item.image}
+                          alt={item.name}
+                          width={50}
+                          height={50}
+                        ></Image>
+                        &nbsp;
+                        {item.name}
                       </Link>
                     </td>
-                    <td className="p-5 text-right">{item.quantity}</td>
+                    <td className="p-5 text-right">
+                      <select
+                        value={item.quantity}
+                        onChange={(e) =>
+                          updateCartHandler(item, e.target.value)
+                        }
+                      >
+                        {[...Array(item.countInStock).keys()].map((x) => (
+                          <option key={x + 1} value={x + 1}>
+                            {x + 1}
+                          </option>
+                        ))}
+                      </select>
+                    </td>
                     <td className="p-5 text-right">${item.price}</td>
                     <td className="p-5 text-center">
                       <button onClick={() => removeItemHandler(item)}>
@@ -73,7 +91,7 @@ export default function CartScreen() {
               </li>
               <li>
                 <button
-                  onClick={() => router.push('/shipping')}
+                  onClick={() => router.push("/shipping")}
                   className="primary-button w-full"
                 >
                   Check Out
